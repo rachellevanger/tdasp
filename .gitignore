@@ -1,3 +1,5 @@
 *.pyc
 *.ipynb
 __pycache__/
+lib/*.pyc
+nldr/*.pyc
