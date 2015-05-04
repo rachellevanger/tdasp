@@ -16,14 +16,16 @@ from optparse import OptionParser
 
 parser = OptionParser('usage: -o //path/options.txt')
 
-parser.add_option("-o", dest="options",
+parser.add_option("-o", dest="optionsfile",
                   help="path to the file contatining all of the variable settings")
 
+(options, args) = parser.parse_args()
 
-options = open(options.options).read()
-options_vars = subsample.split("\n")
 
-for var in options_vars:
+options_file = open(options.optionsfile).read()
+options_file_vars = options_file.split("\n")
+
+for var in options_file_vars:
     var_pair = var.split("=")
     var_name = var_pair[0]
     var_value = var_pair[1]
@@ -36,24 +38,48 @@ for var in options_vars:
         opt_project_dirOut = var_value
     elif var_name == 'project_distmat':
         opt_project_distmat = var_value
+    elif var_name == 'pd_dir':
+        opt_pd_dir = var_value
+    elif var_name == 'order_of_files':
+        opt_order_of_files = var_value
+    elif var_name == 'enstrophy_values':
+        opt_enstrophy_values = var_value
+    elif var_name == 'eps_low':
+        opt_eps_low = float(var_value)
+    elif var_name == 'eps_high':
+        opt_eps_high = float(var_value)
+    elif var_name == 'eps_num_steps':
+        opt_eps_num_steps = int(var_value)
+    elif var_name == 'num_eigenvecs':
+        opt_num_eigenvecs = int(var_value)
+    elif var_name == 'eps_kendall_tau':
+        opt_eps_kendall_tau = var_value
+    elif var_name == 'hom_max':
+        opt_hom_max = int(var_value)
+    elif var_name == 'param_max':
+        opt_param_max = int(var_value)
+    elif var_name == 'param_skip':
+        opt_param_skip = int(var_value)
+
 
 # How to sweep through values of epsilon
-eps_low = 0.1
-eps_high = 1.0
-eps_num_steps = 100
+eps_low = opt_eps_low
+eps_high = opt_eps_high
+eps_num_steps = opt_eps_num_steps
 
 # Number of eigenvectors to compare
-numCoords = 10
+numCoords = opt_num_eigenvecs
 
 # Initialize the project.
 myProject = tdasp.Project(opt_project_name, opt_project_desc, opt_project_dirOut)
 
 # Import the associated distance matrix into the project.
-myProject.loadDistanceMatrix(opt_project_distmat, '', ',')
+myProject.loadDistanceMatrix(opt_project_distmat, '', ' ')
+
 
 # Load field-level data into the project.
-myProject.loadDataAttributesFromFile('/Users/birdbrain/Documents/Research/TakashiData/orderOfFiles.txt','fileName','a16')
-myProject.loadDataAttributesFromFile('/Users/birdbrain/Documents/Research/TakashiData/enstrophy_import.txt','enstrophy','f8')
+myProject.loadDataAttributesFromFile(opt_order_of_files,'fileName','a20')
+myProject.loadDataAttributesFromFile(opt_enstrophy_values,'enstrophy','f8')
 
 # Set single epsilon step
 eps_step = (eps_high - eps_low)/float(eps_num_steps)
@@ -65,8 +91,6 @@ eps_step = (eps_high - eps_low)/float(eps_num_steps)
 # pvals = (float vector length numcoords) p-values for correlation coefficients for eahch eigenvalue
 diff_descriptor = {'names': ('eps','evals','ktau', 'pvals'), 'formats': ('f4', str(numCoords)+'f8', str(numCoords)+'f8', str(numCoords)+'f8', str(numCoords)+'f8')}
 diffusion_array = np.zeros(eps_num_steps, dtype=diff_descriptor)
-
-
 
 
 ####### RUN DIFFUSION MAP ANALYSIS ######
@@ -124,7 +148,10 @@ print('...analysis done!')
 
 ######### RUN SINGLE EPSILON ANALYSIS ###########
 
-eps = myProject.distanceMatrix().mean()
+if opt_eps_kendall_tau == 'mean':
+    eps = myProject.distanceMatrix().mean()
+else:
+    eps = float(opt_eps_kendall_tau)
 
 # Generate Diffusion Map Coordinates.
 myMap = dm.DiffusionMap(eps)
@@ -136,12 +163,12 @@ for j in range(0,EVals.shape[0]):
 print('Loading persistence diagrams into project...')
 
 # Set persistence data directory for project
-myProject.dirPD = '/Users/birdbrain/Documents/Research/TakashiData/20Bins/'
+myProject.dirPD = opt_pd_dir
 myProject.fileFormatPD = '%s_persistence_%d'
 
 
 # Set homology range
-myProject.hom_max = 2
+myProject.hom_max = opt_hom_max
 
 # Load the Persistence Diagrams
 myProject.loadPersistenceDiagrams()
@@ -152,8 +179,8 @@ print('Capturing persistence diagram statistics for correlations...')
 fields = ['birth', 'death', 'lifespan', 'avg_coord']
 
 # Set parameters
-stat_param_max = 500
-stat_param_skip = 5
+stat_param_max = opt_param_max
+stat_param_skip = opt_param_skip
 print("Number of steps: " + str(stat_param_max/stat_param_skip+1))
 
 all_stats = []
