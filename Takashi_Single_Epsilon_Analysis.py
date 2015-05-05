@@ -169,26 +169,4 @@ for field in fields:
 
 
 
-    # # make chart
-    # plt.subplots(1,2,figsize=(15,5))
-    
-    # subplot(1,2,1)
-    # y = corr_stats[fields.index(field), :,:,0]
-    # plot(x, y)
-    # xlabel('n')
-    # ylabel('Kendall-tau correlation coefficient')
-    # title('Kendall-tau correlations: Average(' + field_labels[fields.index(field)] + ')')
-    
-    # subplot(1,2,2)
-    # y = corr_stats[fields.index(field), :,:,1]
-    # semilogy(x, y)
-    # xlabel('n')
-    # ylabel('Kendall-tau p-value')
-    # title('Kendall-tau correlations: Average(' + field_labels[fields.index(field)] + ')')
-    
-    # savefig(myProject.dirOut + 'KT_corr_avg_' + field + '.png')
-    
-    
-
-
 

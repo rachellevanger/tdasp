@@ -106,6 +106,7 @@ class Project(object):
             self._distanceMatrixDesc = description
             if self._numDataPoints == 0:
                 self._numDataPoints = self._distanceMatrix.shape[0]
+                print("Size: " + self._numDataPoints)
                 self._dataPoints = self._initDataPoints(self._numDataPoints)
         else:
             raise ProjectError( ('Current project size is %d points, but distance matrix is '
