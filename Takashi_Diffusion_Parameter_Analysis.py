@@ -7,8 +7,6 @@ from lib import persistenceDiagram as pd
 from scipy.stats import kendalltau
 import numpy as np
 
-from pylab import *
-import matplotlib.pyplot as plt
 
 import sys
 from optparse import OptionParser
