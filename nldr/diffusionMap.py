@@ -6,8 +6,8 @@
 # URL: <http://www.rachellevanger.com/math/TDASP>
 
 import numpy as np
-#from scipy.sparse.linalg.eigen.arpack import eigsh as largest_eigsh
-from scipy.sparse.linalg.eigen.arpack import eigen_symmetric as largest_eigsh
+from scipy.sparse.linalg.eigen.arpack import eigsh as largest_eigsh
+#from scipy.sparse.linalg.eigen.arpack import eigen_symmetric as largest_eigsh
 import warnings as w
 
 ######################################################################
