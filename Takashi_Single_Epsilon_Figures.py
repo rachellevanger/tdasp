@@ -88,7 +88,7 @@ for field in fields:
             break
         line_pair = line.split(", ")
         x.append(float(line_pair[0]))
-        y.append(float(line_pair[1]))
+        y.append(line_pair[1].split(" "))
     plot(x, y)
     xlabel('n')
     ylabel('Kendall-tau correlation coefficient')
@@ -104,7 +104,7 @@ for field in fields:
             break
         line_pair = line.split(", ")
         x.append(float(line_pair[0]))
-        y.append(float(line_pair[1]))
+        y.append(line_pair[1].split(" "))
     semilogy(x, y)
     xlabel('n')
     ylabel('Kendall-tau p-value')
