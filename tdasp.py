@@ -9,6 +9,7 @@ import numpy as np
 import collections as c
 from lib import persistenceDiagram as pd
 from numpy.lib import recfunctions as rf
+import math
 
 
 ######################################################################
@@ -68,6 +69,8 @@ class Project(object):
         self._persistenceDiagrams = [] # Array of persistence diagram objects, in order of point idx field
         self.hom_max = None
         self.dirOut = dirOut
+        self.lifespan_max = 0
+        self.birth_max = 0
 
     def __repr__(self):
         tup = type(self).__name__, self.name, self.description
@@ -163,18 +166,82 @@ class Project(object):
         if self.fileFormatPD == "":
             raise ProjectError( 'File format for names of persistence diagrams not set.' )
 
-        # Remove any existing persistence diagrams
+        # Remove any existing persistence diagrams & reset persistence diagram meta-stats
         self._persistenceDiagrams = []
+        self.lifespan_max = 0
+        self.birth_max = 0
 
+        # Load the persistence diagrams
         for hom in range(0,self.hom_max+1):
             print('Loading diagrams for dimension ' + str(hom) + '.')
             hom_diagrams = []
             for j in range(0,self._numDataPoints):
                 pathToPersistenceDiagram = self.dirPD + (self.fileFormatPD % (self._dataPoints[j]['fileName'], hom))
-                hom_diagrams.append(pd.Diagram(pathToPersistenceDiagram))
+                pDiagram = pd.Diagram(pathToPersistenceDiagram)
+                hom_diagrams.append(pDiagram)
+                self.lifespan_max = max(self.lifespan_max, max(pDiagram.points()['lifespan']))
+                self.birth_max = max(self.birth_max, max(pDiagram.points()['birth']))
             self._persistenceDiagrams.append(hom_diagrams)
 
         print('Diagrams loaded.')
+
+    def generateCoordinates(self, epsilon=1, pts_min=1, pts_max=10, p_min=1, p_max = 3):
+
+        # Determine number of subdivisions for lifespan/birth
+        lifespan_steps = int(math.ceil(self.lifespan_max/float(epsilon)))
+        birth_steps = int(math.ceil(self.birth_max/float(epsilon)))
+
+        # Loop through homology levels
+        for hom in range(0, self.hom_max+1):
+
+            # Loop through each data point
+            for j in range(0, self._numDataPoints):
+
+                # Get top pts_max after sorting descending by lifespan
+                data = self._persistenceDiagrams[hom][j].points()[['birth','lifespan']]
+                data = data[np.argsort(data['lifespan'])[::-1]][0:pts_max]
+
+                num_coords = pts_max - pts_min + 1
+                lifespan_matrix = np.zeros((lifespan_steps, num_coords))
+                birth_matrix = np.zeros((birth_steps, num_coords))
+
+                # Populate Lifespan matrix
+                for col in range(0,num_coords):
+                    if (col + pts_min - 1) == 0:
+                        coldata = data[ 0 ]
+                        for row in range(0, lifespan_steps):
+                            lifespan_matrix[row,col] = int(coldata[1]>=(float(row+1)*epsilon))
+                    else:
+                        coldata = data[0 : col + pts_min ]
+                        for row in range(0, lifespan_steps):
+                            lifespan_matrix[row,col] = len(coldata[coldata['lifespan']>=(float(row+1)*epsilon)])
+
+                # Populate Birth matrix
+                for col in range(0,num_coords):
+                    if (col + pts_min - 1) == 0:
+                        coldata = data[ 0 ]
+                        for row in range(0, birth_steps):
+                            birth_matrix[row,col] = int(coldata[1]>=(float(row+1)*epsilon))
+                    else:
+                        coldata = data[0 : col + pts_min ]
+                        for row in range(0, birth_steps):
+                            birth_matrix[row,col] = len(coldata[coldata['birth']>=(float(row+1)*epsilon)])
+
+
+                # Take p-norms for each matrix
+                lifespan_p_matrix = []
+                birth_p_matrix = []
+                num_ps = p_max - p_min + 1
+                for p_idx in range(0, num_ps):
+                    p = p_min + p_idx
+                    lifespan_coords = np.power( sum( np.power( lifespan_matrix , p_min + p_idx ) ), 1./float(p))
+                    birth_coords = np.power( sum( np.power( birth_matrix , p_min + p_idx ) ), 1./float(p))
+                    lifespan_p_matrix.append(lifespan_coords)
+                    birth_p_matrix.append(birth_coords)
+
+                self._persistenceDiagrams[hom][j].lifespan_coords = lifespan_p_matrix
+                self._persistenceDiagrams[hom][j].birth_coords = birth_p_matrix
+
 
     ######################################################################
     ## utility methods

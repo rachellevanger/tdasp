@@ -43,6 +43,8 @@ class Diagram(object):
     def __init__(self, pathToFile=""):
         self.path = pathToFile
         self._points = np.genfromtxt(pathToFile, delimiter=' ', names='birth, death', dtype='f8, f8')
+        self.lifespan_coords = []
+        self.birth_coords = []
 
         # Generate commonly-used derived fields: lifespan, avg_coord
         self._points = rf.append_fields(self._points, 'lifespan', self._points['death'] - self._points['birth'], dtypes='f8')
@@ -60,10 +62,14 @@ class Diagram(object):
     def points(self):
         return self._points
 
+    def coords(self, name):
+        return self._coords 
+
     ######################################################################
     ## functional methods
     ######################################################################
 
+    
 
 
     ######################################################################

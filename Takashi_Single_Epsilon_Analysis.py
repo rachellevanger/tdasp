@@ -147,6 +147,7 @@ corr_stats = np.zeros((np.shape(fields)[0], stat_param_max/stat_param_skip+1, my
 
 # Loop through each statistic collected
 for field in fields:
+    
     # gather correlations at different parameter values
     for hom in range(0, myProject.hom_max+1):
         for n in range(0,stat_param_max/stat_param_skip+1):
