@@ -8,9 +8,6 @@ from scipy.stats import kendalltau
 import numpy as np
 
 
-from pylab import *
-import matplotlib.pyplot as plt
-
 import sys
 from optparse import OptionParser
 
@@ -170,23 +167,5 @@ print('...correlations captured!')
 
 
 
-        # # make chart
-        # plt.subplots(1,2,figsize=(15,5))
-        
-        # subplot(1,2,1)
-        # y = corr_stats[coord_names.index(c), :,:,hom,0]
-        # plot(x, y)
-        # xlabel('n')
-        # ylabel('Kendall-tau correlation coefficient')
-        # title('Kendall-tau correlations: Average(' + chart_labels[coord_names.index(c)] + ') hom=' + str(hom))
-        
-        # subplot(1,2,2)
-        # y = corr_stats[coord_names.index(c), :,:,hom,1]
-        # semilogy(x, y)
-        # xlabel('n')
-        # ylabel('Kendall-tau p-value')
-        # title('Kendall-tau correlations: Average(' + chart_labels[coord_names.index(c)] + ') hom=' + str(hom))
-        
-        # savefig(myProject.dirOut + 'KT_corr_avg_' + c + '_hom_'+str(hom)+'.png')
 
 
